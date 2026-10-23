@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#0a0908">
+  <meta name="color-scheme" content="dark">
+  <title>Munich CLM 849</title>
+  <style>
+    :root {
+      --ink:#0a0908; --ink-2:#100d0b; --panel:#17120f; --panel-2:#201713;
+      --blood:#8a2218; --blood-light:#b83b2b; --parchment:#d9cbb3; --muted:#998c79;
+      --border:#362a22; --gold:#a9804b; --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px); --header-h:68px; --tabs-h:66px;
+      --radius:14px; --shadow:0 12px 34px rgba(0,0,0,.38);
+    }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body { margin:0; height:100%; background:var(--ink); color:var(--parchment); }
+    body { font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; overscroll-behavior:none; }
+    button,input,select,textarea { font:inherit; }
+    button { color:inherit; }
+    .app-shell { height:100dvh; display:flex; flex-direction:column; overflow:hidden; background:radial-gradient(circle at 50% -15%,#2c1813 0,transparent 42%),var(--ink); }
+    .app-header { flex:0 0 auto; min-height:calc(var(--header-h) + var(--safe-top)); padding:var(--safe-top) 16px 0; border-bottom:1px solid var(--border); background:rgba(10,9,8,.96); display:flex; align-items:center; gap:12px; z-index:20; }
+    .mark { width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--gold);border-radius:50%;font-family:Georgia,serif;color:var(--gold);font-size:19px;box-shadow:inset 0 0 0 4px var(--ink),inset 0 0 0 5px var(--border);flex:none; }
+    .titles { min-width:0; }
+    .eyebrow { color:var(--blood-light);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;font-weight:750; }
+    h1 { margin:3px 0 0;font:600 1.02rem/1.15 Georgia,"Times New Roman",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .content { flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;overscroll-behavior-y:contain;padding:18px 16px calc(22px + var(--tabs-h) + var(--safe-bottom)); }
+    .view { display:none;max-width:820px;margin:0 auto;animation:reveal.2s ease; }
+    .view.active { display:block; }
+    @keyframes reveal { from{opacity:0;transform:translateY(4px)} }
+    h2,h3,h4 { font-family:Georgia,"Times New Roman",serif; }
+    h2 { margin:0 0 8px;font-size:1.5rem;line-height:1.2; }
+    h3 { margin:0;font-size:1.08rem;line-height:1.25; }
+    h4 { margin:0 0 8px;color:var(--gold);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em; }
+    p { line-height:1.55; }
+    .lede { margin:0 0 18px;color:var(--muted);font:italic.98rem/1.5 Georgia,serif; }
+    .rule { height:1px;background:linear-gradient(90deg,transparent,var(--blood),transparent);margin:16px 0; }
+    .card { background:linear-gradient(145deg,rgba(32,23,19,.96),rgba(18,14,12,.97));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:0 0 12px; }
+    .card.pressable { width:100%;text-align:left;cursor:pointer;min-height:76px;position:relative;padding-right:42px; }
+    .card.pressable::after { content:"›";position:absolute;right:17px;top:50%;transform:translateY(-50%);font:28px Georgia,serif;color:var(--blood-light); }
+    .card.pressable:active { transform:scale(.992);background:#261914; }
+    .tag { display:inline-flex;align-items:center;min-height:25px;border:1px solid var(--border);border-radius:999px;padding:3px 9px;color:var(--muted);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase; }
+    .tag.blood { border-color:#642018;color:#dc8a78;background:#2a100d; }
+    .meta { margin-top:7px;color:var(--muted);font-size:.82rem;line-height:1.4; }
+    .filter-row { display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none; }
+    .filter-row::-webkit-scrollbar { display:none; }
+    .chip { min-height:42px;white-space:nowrap;border:1px solid var(--border);border-radius:999px;background:var(--panel);padding:0 15px;color:var(--muted);font-weight:700;font-size:.78rem; }
+    .chip.active { background:var(--blood);color:#fff4e6;border-color:#bd4937; }
+    .back { min-height:44px;border:0;background:transparent;color:#d68b79;font-weight:750;padding:0 8px 0 0;margin:0 0 8px; }
+    .detail-title { font-size:1.7rem;margin-bottom:4px; }
+    .latin-title { color:var(--gold);font:italic 1rem Georgia,serif;margin:0 0 14px; }
+    .detail-section { padding:15px 0;border-top:1px solid var(--border); }
+    .detail-section p { margin:0;color:#c9bba5; }
+    .material-list { display:flex;flex-wrap:wrap;gap:7px; }
+    .material { background:#120e0c;border:1px solid var(--border);border-radius:8px;padding:7px 9px;color:#c7b79e;font-size:.8rem; }
+    .translation-grid { display:grid;gap:10px; }
+    .quote { margin:0;padding:14px;background:#0e0b09;border-left:3px solid var(--blood);border-radius:0 8px 8px 0;color:#d8cbb6;font:italic.93rem/1.55 Georgia,serif;overflow-wrap:anywhere; }
+    .quote small { display:block;margin-bottom:7px;color:var(--gold);font:700 .65rem ui-sans-serif,sans-serif;text-transform:uppercase;letter-spacing:.12em; }
+    .notice { display:flex;gap:10px;padding:12px;border:1px solid #5f421f;background:#231a0f;border-radius:10px;color:#cbb98f;font-size:.82rem;line-height:1.45;margin-bottom:14px; }
+    .notice::before { content:"†";color:var(--gold);font:700 1.2rem Georgia,serif; }
+    .step { display:grid;grid-template-columns:38px 1fr;gap:11px;align-items:start;padding:13px 0;border-bottom:1px solid var(--border); }
+    .step:last-child { border-bottom:0; }
+    .step-no { width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--blood);border-radius:50%;color:#e2917e;font:700 .85rem Georgia,serif; }
+    .step p { margin:5px 0 0;color:var(--muted);font-size:.9rem; }
+    .seal-wrap { display:grid;place-items:center;padding:12px;background:radial-gradient(circle,#1b1210,#080706 65%);border-radius:12px;border:1px solid var(--border); }
+    .seal { width:min(100%,360px);height:auto;color:#b94432;filter:drop-shadow(0 0 6px rgba(138,34,24,.25)); }
+    .day-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px; }
+    .day { min-height:66px;border:1px solid var(--border);border-radius:9px;background:#100c0a;color:var(--muted);font-size:.78rem;padding:8px;text-align:left; }
+    .day strong { display:block;color:var(--parchment);margin-bottom:3px; }
+    .day.done { background:#1d2419;border-color:#53623f;color:#aebf93; }
+    .day.done strong::after { content:" ✓";color:#a9c77c; }
+    .primary,.secondary,.danger { min-height:48px;border-radius:10px;padding:0 16px;font-weight:800;border:1px solid transparent;cursor:pointer; }
+    .primary { background:var(--blood);border-color:#b94836;color:#fff6ed;box-shadow:0 7px 20px rgba(138,34,24,.25); }
+    .secondary { background:#19130f;border-color:var(--border);color:var(--parchment); }
+    .danger { background:#24100e;border-color:#6f241b;color:#e59a89; }
+    .wide { width:100%; }
+    .actions { display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px; }
+    .focus-overlay { position:fixed;inset:0;z-index:1000;background:#010101;display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom)); }
+    .focus-overlay.open { display:flex; }
+    .focus-field { position:absolute;inset:0;overflow:hidden;background:radial-gradient(circle at 50% 50%,#141313 0,#050505 31%,#000 72%); }
+    .focus-field::before { content:"";position:absolute;width:33vmin;height:33vmin;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(180,180,180,.1) 0,rgba(94,24,18,.12) 21%,rgba(0,0,0,0) 68%);box-shadow:0 0 70px rgba(130,33,25,.11);animation:pulse 7s ease-in-out infinite; }
+    .focus-field::after { content:"";position:absolute;width:5px;height:5px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:#695c50;box-shadow:0 0 13px #b34333;animation:pulseDot 5s ease-in-out infinite; }
+    @keyframes pulse { 50%{transform:translate(-50%,-50%) scale(1.12);opacity:.65} }
+    @keyframes pulseDot { 50%{opacity:.35;box-shadow:0 0 25px #b34333} }
+    .focus-ui { position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between; }
+    .focus-top { color:#776b61;font:italic.8rem Georgia,serif;letter-spacing:.1em; }
+    .focus-time { margin-top:auto;margin-bottom:auto;color:#544b44;font:1rem ui-monospace,monospace; }
+    .focus-close { width:min(100%,420px);background:rgba(15,13,12,.8);backdrop-filter:blur(5px); }
+    .schematic { width:100%;height:auto;display:block;background:#0c0a09;border:1px solid var(--border);border-radius:12px; }
+    .name-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+    .name-card { min-height:96px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#110d0b; }
+    .name-card strong { display:block;color:#d99b6b;font:1rem Georgia,serif;margin-bottom:5px; }
+    .name-card span { color:var(--muted);font-size:.76rem;line-height:1.4; }
+    details { border:1px solid var(--border);border-radius:10px;background:#110d0b;margin-bottom:9px;overflow:hidden; }
+    summary { min-height:50px;display:flex;align-items:center;padding:0 14px;cursor:pointer;font-weight:800; }
+    details>div { border-top:1px solid var(--border);padding:14px;color:var(--muted);font-size:.9rem;line-height:1.55; }
+    .form-grid { display:grid;gap:13px; }
+    label { display:grid;gap:7px;color:#c2b29a;font-weight:750;font-size:.8rem;letter-spacing:.02em; }
+    input,select,textarea { width:100%;border:1px solid var(--border);border-radius:10px;background:#0e0b09;color:var(--parchment);padding:12px;outline:none;min-height:48px; }
+    textarea { min-height:126px;resize:vertical;line-height:1.45; }
+    input:focus,select:focus,textarea:focus { border-color:var(--blood-light);box-shadow:0 0 0 3px rgba(138,34,24,.18); }
+    .entry { border-left:3px solid var(--blood); }
+    .entry-head { display:flex;justify-content:space-between;gap:12px;align-items:start; }
+    .entry h3 { overflow-wrap:anywhere; }
+    .entry time { color:var(--muted);font-size:.7rem;white-space:nowrap; }
+    .entry p { color:#b5a68f;font-size:.87rem;white-space:pre-wrap;overflow-wrap:anywhere;margin:10px 0; }
+    .entry-actions { display:flex;justify-content:flex-end; }
+    .icon-btn { min-width:44px;min-height:44px;border:1px solid var(--border);background:#130e0c;border-radius:9px;color:#cf8978; }
+    .empty { text-align:center;padding:28px 14px;color:var(--muted);font:italic.95rem Georgia,serif; }
+    .tabs { position:fixed;left:0;right:0;bottom:0;z-index:30;min-height:calc(var(--tabs-h) + var(--safe-bottom));padding:0 7px var(--safe-bottom);background:rgba(10,9,8,.97);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 -9px 25px rgba(0,0,0,.35); }
+    .tab { min-width:44px;min-height:var(--tabs-h);border:0;background:transparent;color:#75695d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:.62rem;font-weight:750;letter-spacing:.02em; }
+    .tab svg { width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7; }
+    .tab.active { color:#dc8978; }
+    .tab.active::before { content:"";position:absolute;top:0;width:34px;height:2px;background:var(--blood-light);box-shadow:0 0 7px var(--blood); }
+    .sr-only { position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    .toast { position:fixed;left:50%;bottom:calc(var(--tabs-h) + var(--safe-bottom) + 12px);transform:translate(-50%,16px);z-index:2000;max-width:calc(100% - 32px);background:#2d211a;border:1px solid #6a4938;color:#f1dfc7;padding:11px 16px;border-radius:999px;box-shadow:var(--shadow);font-size:.82rem;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .toast.show { opacity:1;transform:translate(-50%,0); }
+    dialog { width:min(calc(100% - 28px),480px);border:1px solid var(--border);border-radius:14px;background:#17110e;color:var(--parchment);padding:19px;box-shadow:0 20px 70px #000; }
+    dialog::backdrop { background:rgba(0,0,0,.78); }
+    dialog h3 { font-size:1.3rem; }
+    dialog p { color:var(--muted); }
+    @media (min-width:650px) {
+      .content { padding-left:24px;padding-right:24px; }
+      .translation-grid { grid-template-columns:1fr 1fr; }
+      .day-grid { grid-template-columns:repeat(9,1fr); }
+      .name-grid { grid-template-columns:repeat(3,1fr); }
+      .form-grid.two { grid-template-columns:1fr 1fr; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="app">
+  <header class="app-header">
+    <div class="mark" aria-hidden="true">849</div>
+    <div class="titles"><div class="eyebrow">Codex Latinus Monacensis</div><h1>Clerical Necromancer’s Manual</h1></div>
+  </header>
+  <main class="content" id="content" tabindex="-1">
+    <section class="view active" id="view-operations" aria-labelledby="operations-title">
+      <h2 id="operations-title">Threefold Operations</h2>
+      <p class="lede">A mobile directory arranged by Kieckhefer’s functional taxonomy.</p>
+      <div class="filter-row" id="filters" aria-label="Filter operations"></div>
+      <div id="operation-list"></div>
+      <div id="operation-detail" hidden></div>
+    </section>
+
+    <section class="view" id="view-mirror" aria-labelledby="mirror-title">
+      <h2 id="mirror-title">The Mirror of Floron</h2>
+      <p class="lede">A scholarly, non-operative reconstruction of Clm 849, fols. 37r–38r.</p>
+      <div class="notice">Historical study interface only. Do not burn unknown substances, ingest ritual materials, involve minors, or reproduce harmful manuscript practices.</div>
+      <div class="card">
+        <h4>Seal and reverse</h4>
+        <div class="seal-wrap">
+          <svg class="seal" viewBox="0 0 420 420" role="img" aria-labelledby="sealTitle sealDesc">
+            <title id="sealTitle">Stylized scholarly reconstruction of the Floron mirror reverse</title>
+            <desc id="sealDesc">Concentric circles, ten manuscript-derived boundary names, and Floron arranged at the center.</desc>
+            <circle cx="210" cy="210" r="184" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="210" cy="210" r="145" fill="none" stroke="#6f5845" stroke-width="1"/>
+            <circle cx="210" cy="210" r="72" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M210 26V394M26 210H394M80 80L340 340M340 80L80 340" stroke="#3d2d25" stroke-width="1"/>
+            <g fill="#bca98b" font-size="11" font-family="Georgia,serif" text-anchor="middle">
+              <text x="210" y="47">SENEGLAFARAN</text><text x="315" y="82">PATRAMOY</text>
+              <text x="375" y="174">BERITH</text><text x="358" y="292">SAMAH</text>
+              <text x="273" y="376">SAMMALE</text><text x="147" y="376">FIRTAGUS</text>
+              <text x="61" y="292">BELLAY</text><text x="45" y="174">BARIA</text>
+              <text x="105" y="82">GUOMAN</text><text x="210" y="95">BATHA</text>
+            </g>
+            <g fill="#d3b68c" font-size="31" font-family="Georgia,serif" text-anchor="middle">
+              <text x="172" y="201">F</text><text x="210" y="201">L</text><text x="248" y="201">O</text>
+              <text x="172" y="240">R</text><text x="210" y="240">O</text><text x="248" y="240">N</text>
+            </g>
+            <g fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M210 119l10 18-10 18-10-18zM291 210l18-10 18 10-18 10zM210 265l10 18-10 18-10-18zM93 210l18-10 18 10-18 10z"/>
+              <path d="M142 142l22 5-5 22-22-5zM256 147l22-5 5 22-22 5zM256 273l5-22 22 5-5 22zM142 278l-5-22 22-5 5 22z"/>
+            </g>
+          </svg>
+        </div>
+        <p class="meta">Names follow uncertain manuscript readings; geometry is a clearly labeled modern reconstruction, not a facsimile.</p>
+      </div>
+      <div class="card"><h4>Consecration sequence</h4><div id="mirror-steps"></div></div>
+      <div class="card">
+        <h4>Nine-session study cycle</h4>
+        <p class="meta">The manuscript says the procedure is completed nine times; the app turns this into a neutral reading tracker.</p>
+        <div class="day-grid" id="day-grid"></div>
+        <div class="actions"><button class="secondary" id="reset-days" type="button">Reset cycle</button><button class="primary" id="focus-launch" type="button">Enter Focus Mode</button></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-reference" aria-labelledby="reference-title">
+      <h2 id="reference-title">Circles & Master Names</h2>
+      <p class="lede">Structural diagrams, manuscript personae, and formulas for closure.</p>
+      <div class="card">
+        <h4>Circle schematic</h4>
+        <svg class="schematic" viewBox="0 0 620 390" role="img" aria-labelledby="circleTitle circleDesc">
+          <title id="circleTitle">Generalized working-circle orientation</title><desc id="circleDesc">Master at center, assistants at the southwest and southeast, and four directional gates.</desc>
+          <rect width="620" height="390" fill="#0c0a09"/>
+          <g fill="none" stroke="#6b2b22"><circle cx="310" cy="198" r="137" stroke-width="2"/><circle cx="310" cy="198" r="108"/><circle cx="310" cy="198" r="44" stroke="#a06d49"/></g>
+          <g stroke="#59443a" stroke-dasharray="5 7"><path d="M310 18V378M16 198H604"/></g>
+          <g fill="#d9cbb3" font-family="Georgia,serif" text-anchor="middle"><text x="310" y="31">EAST · ORIENS</text><text x="310" y="375">WEST · OCCIDENS</text><text x="54" y="188">NORTH</text><text x="54" y="204">SEPTENTRIO</text><text x="566" y="188">SOUTH</text><text x="566" y="204">MERIDIES</text><text x="310" y="194" fill="#d28c73">MASTER</text><text x="310" y="211" font-size="12">locus magistri</text></g>
+          <g fill="#9d8d77" font-family="ui-sans-serif,sans-serif" font-size="12" text-anchor="middle"><circle cx="220" cy="284" r="18" fill="#17120f" stroke="#695042"/><text x="220" y="288">A1</text><circle cx="400" cy="284" r="18" fill="#17120f" stroke="#695042"/><text x="400" y="288">A2</text><text x="310" y="337">assistants remain within the inner boundary</text></g>
+          <g fill="#a84131"><path d="M310 51l-7 12h14zM310 345l-7-12h14zM173 198l12-7v14zM447 198l-12-7v14z"/></g>
+        </svg>
+        <p class="meta">Generalized orientation synthesized from recurring circle logic in Clm 849; individual figures vary by experiment.</p>
+      </div>
+      <div class="card"><h4>Named hierarchy</h4><div class="name-grid" id="name-grid"></div></div>
+      <div class="card">
+        <h4>Licentia recedendi</h4>
+        <div class="translation-grid">
+          <blockquote class="quote"><small>Latin closure</small>Ego vos absolvo, ut eatis ad vestrum libitum et recedatis cum pace, sine nocumento cuiuscumque.</blockquote>
+          <blockquote class="quote"><small>English guidance</small>“I release you, that you may go at your pleasure and withdraw in peace, without harm to anyone.”</blockquote>
+        </div>
+        <p class="meta">A normalized formula assembled from recurring dismissal language; manuscript wording varies by operation.</p>
+      </div>
+      <details><summary>Safe closure sequence</summary><div>End inquiry; give the license to depart; wait in silence; erase or close the figure only after dismissal; extinguish lights safely; record observations without claiming objective verification.</div></details>
+      <details><summary>Textual caution</summary><div>Many readings are damaged or uncertain. Bracketed names in editions signal editorial doubt, and a modern diagram should never be mistaken for the manuscript image itself.</div></details>
+      <details><summary>Sources & scope</summary><div>Primary witness: Bayerische Staatsbibliothek, Clm 849, especially fols. 3r–108v. Taxonomy: Richard Kieckhefer, <em>Forbidden Rites</em> (1998). Floron material: fols. 37r–38r. This offline app uses brief original translations and normalized summaries for education.</div></details>
+    </section>
+
+    <section class="view" id="view-ledger" aria-labelledby="ledger-title">
+      <h2 id="ledger-title">Operative Working Ledger</h2>
+      <p class="lede">Private on-device notes. Nothing leaves this app unless you export it.</p>
+      <form class="card form-grid" id="ledger-form">
+        <label>Experiment title<input id="log-title" name="title" maxlength="120" required autocomplete="off" placeholder="e.g., Mirror study, session I"></label>
+        <div class="form-grid two">
+          <label>Category<select id="log-category" name="category"><option>Illusion</option><option>Mind</option><option>Divination</option></select></label>
+          <label>Outcome status<select id="log-status" name="status"><option>Planned</option><option>In progress</option><option>Inconclusive</option><option>Completed</option><option>Abandoned</option></select></label>
+        </div>
+        <label>Hour & planetary alignment<input id="log-alignment" name="alignment" maxlength="160" placeholder="e.g., Thursday, hour of Jupiter"></label>
+        <label>Visionary observations / scrying notes<textarea id="log-notes" name="notes" maxlength="8000" placeholder="Record observations, context, and interpretations…"></textarea></label>
+        <button class="primary wide" type="submit">Save Log</button>
+      </form>
+      <div class="actions"><button class="secondary" id="export-ledger" type="button">Export TXT</button><button class="danger" id="clear-ledger" type="button">Clear Data</button></div>
+      <div class="rule"></div>
+      <div id="ledger-entries" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <nav class="tabs" aria-label="Primary">
+    <button class="tab active" data-tab="operations" type="button" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Operations</span></button>
+    <button class="tab" data-tab="mirror" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="10" r="7"/><path d="M9 17v3h6v-3M12 3v14"/></svg><span>Mirror</span></button>
+    <button class="tab" data-tab="reference" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></svg><span>Circles</span></button>
+    <button class="tab" data-tab="ledger" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg><span>Ledger</span></button>
+  </nav>
+</div>
+
+<div class="focus-overlay" id="focus-overlay" role="dialog" aria-modal="true" aria-label="Scrying focus mode">
+  <div class="focus-field" aria-hidden="true"></div><div class="focus-ui"><div class="focus-top">SPECULUM FLORONIS · SILENT STUDY</div><div class="focus-time" id="focus-time">00:00</div><button class="secondary focus-close" id="focus-close" type="button">Close Focus Mode</button></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="confirm-dialog"><h3>Clear the ledger?</h3><p>This permanently removes every locally saved entry from this device.</p><div class="actions"><button class="secondary" id="cancel-clear" type="button">Cancel</button><button class="danger" id="confirm-clear" type="button">Clear all</button></div></dialog>
+
+<script>
+const CLM_OPERATIONS = [
+  {
+    id:"castle", category:"Illusoria", latin:"Experimentum ad castrum pulcherrimum apparere faciendum", title:"The Castle of Illusion", folio:"fols. 20r–22v",
+    purpose:"To stage the appearance of a fortified castle, troops, and a dramatic siege before selected witnesses.",
+    mechanics:"A bounded operator petitions named spirits, assigns the visible spectacle, and controls its duration. The account culminates in the castle and assailants vanishing after dismissal.",
+    materia:["consecrated sword","level ground","inscribed circle","operator’s ring","clean garments"],
+    latinExcerpt:"…facere apparere castrum pulcherrimum et fortissimum…",
+    translation:"…to cause a most beautiful and strongly fortified castle to appear…",
+    timing:"A clear, secluded setting; the surviving text emphasizes ordered preparation and a formally limited duration rather than a single planetary hour."
+  },
+  {
+    id:"banquet", category:"Illusoria", latin:"Experimentum de convivio apparenti", title:"The Spectral Banquet", folio:"fols. 16r–18v",
+    purpose:"To present an apparently sumptuous feast, attendants, vessels, music, and entertainment to a company.",
+    mechanics:"The operator works from a circle, directs spirits to assume courtly service roles, and ends the display by granting leave to withdraw before erasing the figure.",
+    materia:["ritual circle","sword","seats or table","written characters","fumigation"],
+    latinExcerpt:"Itaque petant licentiam recedendi, quibus dabis…",
+    translation:"Then let them ask leave to withdraw, which you shall grant…",
+    timing:"Traditionally begun in a prepared place before the appointed gathering; silence and orderly dismissal govern the close."
+  },
+  {
+    id:"steed", category:"Illusoria", latin:"Experimentum ad equum mirabilem habendum", title:"The Phantom Steed", folio:"fols. 24v–27r; 36r–v",
+    purpose:"To call an extraordinary horse for rapid symbolic travel and dismiss it after the journey.",
+    mechanics:"A bridle functions as the controlling substrate. The operator summons the steed, mounts only after a protective charge, then removes the bridle and gives leave to depart.",
+    materia:["bridle","hay","sword-drawn circle","written divine names","concealed storage place"],
+    latinExcerpt:"…statim equus niger veniet… tolle frenum et subito equus recedet.",
+    translation:"…at once a black horse will come… remove the bridle, and immediately the horse will withdraw.",
+    timing:"Some recensions specify a three-day preparation; the call itself is made in a secluded place under a clear sky."
+  },
+  {
+    id:"discord", category:"Psychologica", latin:"Ad faciendum odium et inimicitiam", title:"Sowing Discord among Enemies", folio:"fols. 13v–15r",
+    purpose:"A coercive image-working intended to create hostility between named persons; presented here only as historical evidence.",
+    mechanics:"Two named images or stones are separated, heated or fumigated, and addressed by analogy. The manuscript also preserves a reversal intended to restore the former state.",
+    materia:["two smooth river stones","iron stylus","linen wrapping","sulphur fumigation","running water"],
+    latinExcerpt:"Ad faciendum odium… accipe duos lapides… et in uno sculpere nomen unius.",
+    translation:"To make hatred… take two stones… and on one carve the name of one person.",
+    timing:"Associated with hostile planetary conditions; related sections identify Tuesday or the day/hour of Mars for enmity."
+  },
+  {
+    id:"favor", category:"Psychologica", latin:"Experimentum ad gratiam principum obtinendam", title:"Compelling Royal Favor", folio:"fols. 12v–13v",
+    purpose:"To obtain welcome, social favor, or favorable reception from a ruler or dignitary.",
+    mechanics:"A small image and named inscription serve as the focus; the text claims the operation was used to obtain a Persian king’s favor.",
+    materia:["soft stone or wax image","linen cloth","inscribed names","fumigation","concealed vessel"],
+    latinExcerpt:"Hoc experimentum… ad obtinendam gratiam regis Persarum.",
+    translation:"This experiment was used… to obtain the favor of a Persian king.",
+    timing:"The favorable hours of Jupiter or the Sun are consistent with the manuscript’s later planetary table; avoid treating this editorial correlation as an exact rubric."
+  },
+  {
+    id:"will", category:"Psychologica", latin:"Ad voluntatem hominis subiugandam", title:"Subduing Will", folio:"fols. 11v–13r",
+    purpose:"A coercive binding intended to bend another person’s affection or obedience; retained as a critical historical record, not guidance.",
+    mechanics:"Paired figures are named, joined, wrapped, and concealed while verbal analogies transfer the imagined binding to the target.",
+    materia:["two soft stones","engraved figures","linen cord","small vessel","written names"],
+    latinExcerpt:"Sicut iste imagines coniunctae sunt, ita cor et voluntas…",
+    translation:"As these images are joined, so [may] the heart and will [be joined]…",
+    timing:"One related sequence specifies Thursday, the day of Jupiter; another uses Friday, the day of Venus."
+  },
+  {
+    id:"floron", category:"Divinatoria", latin:"Hic incipit speculum Floron", title:"The Scrying of Floron in the Mirror", folio:"fols. 37r–38r",
+    purpose:"To seek answers concerning past, present, and future through a polished steel mirror attributed to Floron.",
+    mechanics:"The reverse bears Floron’s name, boundary names, and characters. After cleansing and fumigation, the manuscript describes a visionary knight who answers questions; repetition nine times is emphasized.",
+    materia:["round polished steel mirror","handle","pure balsam","aloeswood","amber","myrrh","white frankincense","honey, milk, and wine"],
+    latinExcerpt:"Tunc magister ipsum interroget de praeteritis, praesentibus et futuris…",
+    translation:"Then let the master question him concerning things past, present, and future…",
+    timing:"The passage specifies nine completions but no unambiguous planetary hour; work in a clean, consecrated place."
+  },
+  {
+    id:"water", category:"Divinatoria", latin:"Experimentum in vase aquae clarae", title:"The Water Vessel of Truth", folio:"representative of the divinatory group",
+    purpose:"To obtain a visionary response through clear water used as a reflective medium.",
+    mechanics:"A clean vessel and water become the perceptual field; prayers, names, and directed gazing frame the inquiry. Youth mediums occur elsewhere in the manuscript but are not reproduced as practice here.",
+    materia:["clean vessel","spring water","white cloth","lamp or candle","written characters"],
+    latinExcerpt:"…in vase mundo aquam claram pone, et super eam nomina scribe…",
+    translation:"…place clear water in a clean vessel, and write the names over it…",
+    timing:"Traditionally a quiet night hour under a clear Moon; this is a representative synthesis, not a verbatim rubric from one securely identified folio."
+  },
+  {
+    id:"treasure", category:"Divinatoria", latin:"Ad inveniendum thesaurum occultum", title:"The Discovery of Hidden Treasure", folio:"fols. 50r–67v (spirit catalogue context)",
+    purpose:"To question spirits said to reveal the location and guardianship of concealed treasure.",
+    mechanics:"The manual’s catalogue assigns treasure-revealing powers to named rulers. A circle, formal petition, precise question, and dismissal structure the inquiry.",
+    materia:["consecrated sword","circle","spirit seal","lead plate","lamp","written petition"],
+    latinExcerpt:"…ostendit loca thesaurorum occultorum, in quibus locis sint…",
+    translation:"…he shows the places of hidden treasures, and in what places they are…",
+    timing:"The planetary sections associate subterranean and hidden matters with Saturn; individual spirit descriptions may set different constraints."
+  }
+];
+
+const MIRROR_STEPS = [
+  ["Prepare the surface","The manuscript calls for a round mirror of pure steel, one palm across, polished like a sword, with a handle."],
+  ["Inscribe the reverse","Place FLORON centrally and arrange the ten uncertain boundary names with ten characters on the non-reflective side."],
+  ["Purify the operator","The historical text prescribes bathing and clean garments. For study, simply create a quiet, ventilated, distraction-free setting."],
+  ["Anoint symbolically","The source names pure balsam on the shining face. Preserve modern optics by using no liquids; treat this as textual annotation only."],
+  ["Study the fumigation rubric","Aloeswood, amber, myrrh, and white frankincense are named. Do not burn materials in this app exercise."],
+  ["Mark the threefold mixture","Honey, milk, and wine in equal parts appear in the source. Keep this as a manuscript note, not a preparation instruction."],
+  ["Read the inquiry","Form one precise historical or textual question. Observe without treating impressions as verified facts."],
+  ["Repeat across nine sessions","Folio 38r emphasizes nine completions. The tracker below records reading sessions locally."],
+  ["Close and document","Use the license to depart, end the focus mode, and record observations and interpretive limits in the ledger."]
+];
+
+const SPIRIT_HIERARCHY = [
+  ["Lucifer","A supreme or high-ranking name in several conjurations; medieval lists are inconsistent rather than systematic."],
+  ["Sathan","A commanding adversarial name, frequently grouped with other rulers in coercive conjurations."],
+  ["Belzebub","A major ruler invoked among superior names; spelling varies as Belzebub or Beelzebub."],
+  ["Floron","The mirror spirit appearing as an armed knight with a squire in the fol. 38r description."],
+  ["Sibillia","A female or sibylline spirit-name associated with revelatory knowledge in the manuscript tradition."],
+  ["Berith","A recurrent superior name, appearing in teaching, image, and mirror-adjacent formulae."],
+  ["Apolin","A royal spirit-name petitioned with Maraloth and Berith to provide a teacher of sciences."],
+  ["Maraloth","One of the three rulers in the opening pedagogical experiment."],
+  ["Astaroth","A powerful catalogued spirit and recurring name in hostile or divinatory operations."]
+];
+
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+const STORE = { ledger:"clm849.ledger.v1", days:"clm849.mirrorDays.v1" };
+const state = { tab:"operations", filter:"All", ledger:[], focusStart:0, focusTimer:null, toastTimer:null };
+
+function safeLoad(key, fallback) { try { const value=JSON.parse(localStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
+function safeSave(key, value) { try { localStorage.setItem(key,JSON.stringify(value)); return true; } catch { toast("Storage is unavailable on this device"); return false; } }
+function el(tag, cls, text) { const node=document.createElement(tag); if(cls) node.className=cls; if(text!==undefined) node.textContent=text; return node; }
+function toast(message) { const box=$("#toast"); box.textContent=message; box.classList.add("show"); clearTimeout(state.toastTimer); state.toastTimer=setTimeout(()=>box.classList.remove("show"),2200); }
+function scrollTop() { const c=$("#content"); c.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); }
+
+function setTab(name) {
+  state.tab=name;
+  $$(".view").forEach(v=>v.classList.toggle("active",v.id===`view-${name}`));
+  $$(".tab").forEach(t=>{ const active=t.dataset.tab===name;t.classList.toggle("active",active);active?t.setAttribute("aria-current","page"):t.removeAttribute("aria-current"); });
+  if(name==="ledger") renderLedger();
+  scrollTop();
+  setTimeout(()=>$("#content").focus({preventScroll:true}),0);
+}
+
+function renderFilters() {
+  const host=$("#filters"); host.replaceChildren();
+  ["All","Illusoria","Psychologica","Divinatoria"].forEach(name=>{
+    const b=el("button",`chip${state.filter===name?" active":""}`,name);b.type="button";b.setAttribute("aria-pressed",String(state.filter===name));
+    b.addEventListener("click",()=>{state.filter=name;renderFilters();renderOperations();});host.append(b);
+  });
+}
+
+function renderOperations() {
+  const list=$("#operation-list"), detail=$("#operation-detail"); detail.hidden=true;list.hidden=false;list.replaceChildren();
+  CLM_OPERATIONS.filter(o=>state.filter==="All"||o.category===state.filter).forEach(o=>{
+    const b=el("button","card pressable");b.type="button";b.dataset.id=o.id;
+    const tag=el("span","tag blood",o.category);const h=el("h3","",o.title);h.style.marginTop="9px";const m=el("div","meta",`${o.latin} · ${o.folio}`);
+    b.append(tag,h,m);b.addEventListener("click",()=>showOperation(o.id));list.append(b);
+  });
+}
+
+function showOperation(id) {
+  const o=CLM_OPERATIONS.find(x=>x.id===id); if(!o)return;
+  const list=$("#operation-list"), host=$("#operation-detail");list.hidden=true;host.hidden=false;host.replaceChildren();
+  const back=el("button","back","‹ Back to directory");back.type="button";back.addEventListener("click",()=>{host.hidden=true;list.hidden=false;scrollTop();});
+  const h=el("h2","detail-title",o.title), latin=el("p","latin-title",o.latin), folio=el("span","tag",o.folio);
+  host.append(back,h,latin,folio);
+  const sections=[
+    ["Traditional purpose",o.purpose],
+    ["Mechanics",o.mechanics],
+    ["Astrological timing",o.timing]
+  ];
+  sections.forEach(([title,text])=>{const s=el("div","detail-section");s.append(el("h4","",title),el("p","",text));host.append(s);});
+  const mat=el("div","detail-section");mat.append(el("h4","","Materia & substrates"));const chips=el("div","material-list");o.materia.forEach(x=>chips.append(el("span","material",x)));mat.append(chips);host.append(mat);
+  const ex=el("div","detail-section");ex.append(el("h4","","Conjuration excerpt"));const grid=el("div","translation-grid");const q1=el("blockquote","quote"),q2=el("blockquote","quote");q1.append(el("small","","Latin"),document.createTextNode(o.latinExcerpt));q2.append(el("small","","English"),document.createTextNode(o.translation));grid.append(q1,q2);ex.append(grid);host.append(ex);
+  scrollTop();
+}
+
+function renderMirror() {
+  const steps=$("#mirror-steps");steps.replaceChildren();MIRROR_STEPS.forEach((s,i)=>{const row=el("div","step"),n=el("div","step-no",String(i+1)),body=el("div");body.append(el("h3","",s[0]),el("p","",s[1]));row.append(n,body);steps.append(row);});
+  renderDays();
+}
+function renderDays() {
+  const done=safeLoad(STORE.days,[]),grid=$("#day-grid");grid.replaceChildren();
+  for(let i=1;i<=9;i++){const active=done.includes(i),b=el("button",`day${active?" done":""}`);b.type="button";b.setAttribute("aria-pressed",String(active));b.append(el("strong","",`Session ${i}`),document.createTextNode(active?"Completed":"Tap to mark"));b.addEventListener("click",()=>{const data=safeLoad(STORE.days,[]);const next=data.includes(i)?data.filter(x=>x!==i):[...data,i].sort((a,b)=>a-b);safeSave(STORE.days,next);renderDays();});grid.append(b);}
+}
+
+function openFocus() { const overlay=$("#focus-overlay");overlay.classList.add("open");document.body.style.overflow="hidden";state.focusStart=Date.now();updateFocus();state.focusTimer=setInterval(updateFocus,1000);$("#focus-close").focus(); }
+function closeFocus() { $("#focus-overlay").classList.remove("open");document.body.style.overflow="";clearInterval(state.focusTimer);state.focusTimer=null;$("#focus-launch").focus(); }
+function updateFocus() { const sec=Math.floor((Date.now()-state.focusStart)/1000),m=String(Math.floor(sec/60)).padStart(2,"0"),s=String(sec%60).padStart(2,"0");$("#focus-time").textContent=`${m}:${s}`; }
+
+function renderNames() { const grid=$("#name-grid");grid.replaceChildren();SPIRIT_HIERARCHY.forEach(([name,desc])=>{const c=el("div","name-card");c.append(el("strong","",name),el("span","",desc));grid.append(c);}); }
+
+function loadLedger() { const data=safeLoad(STORE.ledger,[]);state.ledger=Array.isArray(data)?data.filter(x=>x&&typeof x==="object"):[]; }
+function saveLedger() { return safeSave(STORE.ledger,state.ledger); }
+function renderLedger() {
+  loadLedger();const host=$("#ledger-entries");host.replaceChildren();
+  if(!state.ledger.length){host.append(el("div","empty","No entries yet. Your private ledger will appear here."));return;}
+  [...state.ledger].sort((a,b)=>b.createdAt-a.createdAt).forEach(item=>{
+    const card=el("article","card entry"),head=el("div","entry-head"),left=el("div");left.append(el("span","tag blood",item.category||"Uncategorized"),el("h3","",item.title||"Untitled"));const time=el("time","",new Date(item.createdAt).toLocaleString());head.append(left,time);
+    const meta=el("div","meta",`${item.status||"Unspecified"}${item.alignment?` · ${item.alignment}`:""}`),notes=el("p","",item.notes||"No observations recorded."),actions=el("div","entry-actions"),del=el("button","icon-btn","Delete");del.type="button";del.setAttribute("aria-label",`Delete ${item.title||"entry"}`);del.addEventListener("click",()=>{state.ledger=state.ledger.filter(x=>x.id!==item.id);if(saveLedger()){renderLedger();toast("Entry deleted");}});actions.append(del);card.append(head,meta,notes,actions);host.append(card);
+  });
+}
+function submitLedger(event) {
+  event.preventDefault();const form=new FormData(event.currentTarget),title=String(form.get("title")||"").trim();if(!title)return;
+  const item={id:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,createdAt:Date.now(),title,category:String(form.get("category")||""),status:String(form.get("status")||""),alignment:String(form.get("alignment")||"").trim(),notes:String(form.get("notes")||"").trim()};
+  state.ledger.push(item);if(saveLedger()){event.currentTarget.reset();renderLedger();toast("Log saved on this device");}
+}
+function exportLedger() {
+  loadLedger();if(!state.ledger.length){toast("There are no entries to export");return;}
+  const lines=["MUNICH CLM 849, OPERATIVE WORKING LEDGER","Offline export",`Generated: ${new Date().toLocaleString()}`,"","=".repeat(56),""];
+  [...state.ledger].sort((a,b)=>a.createdAt-b.createdAt).forEach((x,i)=>lines.push(`ENTRY ${i+1}`,`Title: ${x.title}`,`Date: ${new Date(x.createdAt).toLocaleString()}`,`Category: ${x.category}`,`Status: ${x.status}`,`Hour & alignment: ${x.alignment||"—"}`,"Observations:",x.notes||"—","","-".repeat(56),""));
+  const blob=new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`clm849-ledger-${new Date().toISOString().slice(0,10)}.txt`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Ledger exported");
+}
+function askClear() { const d=$("#confirm-dialog");if(typeof d.showModal==="function")d.showModal();else if(confirm("Permanently clear every ledger entry?"))clearLedger(); }
+function clearLedger() { state.ledger=[];safeSave(STORE.ledger,[]);renderLedger();const d=$("#confirm-dialog");if(d.open)d.close();toast("Ledger cleared"); }
+
+function init() {
+  renderFilters();renderOperations();renderMirror();renderNames();renderLedger();
+  $$(".tab").forEach(t=>t.addEventListener("click",()=>setTab(t.dataset.tab)));
+  $("#focus-launch").addEventListener("click",openFocus);$("#focus-close").addEventListener("click",closeFocus);
+  $("#reset-days").addEventListener("click",()=>{safeSave(STORE.days,[]);renderDays();toast("Study cycle reset");});
+  $("#ledger-form").addEventListener("submit",submitLedger);$("#export-ledger").addEventListener("click",exportLedger);$("#clear-ledger").addEventListener("click",askClear);
+  $("#cancel-clear").addEventListener("click",()=>$("#confirm-dialog").close());$("#confirm-clear").addEventListener("click",clearLedger);
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#focus-overlay").classList.contains("open"))closeFocus();});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden&&state.focusTimer){clearInterval(state.focusTimer);state.focusTimer=null;}else if(!document.hidden&&$("#focus-overlay").classList.contains("open")&&!state.focusTimer){updateFocus();state.focusTimer=setInterval(updateFocus,1000);}});
+}
+init();
+</script>
+</body>
+</html>
